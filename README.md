@@ -1,34 +1,22 @@
 # Remote Server Sync
 
-A Bash script to download / sync files from a remote FTP server to a local directory. For example sync torrents from a seedbox to a media player.
+A bash script to download / sync files from a remote server to a local directory. For example sync torrents from a seedbox to a media player.
 
 ## How to Use
 
-1. The script requires the [LFTP](https://lftp.yar.ru) package:
+1. Install [LFTP](https://lftp.yar.ru) package:
 
     ```
     sudo apt-get install lftp
     ```
 
-1. Connect to the SFTP server to add the RSA key fingerprint in the list of known hosts:
+1. Connect to remote machine to add the RSA key in the list of known hosts:
 
     ```
     ssh -p 22 username:password@host
     ```
 
-1. Update config values - example below:
-
-    ```
-    login=johnsmith
-    pass=password01
-    host=example.com
-    remote_dir=/path/to/remote/folder
-    local_dir=/path/to/local/folder
-    log_dir=/path/to/log/folder
-    log_file_name=sync.log
-    parallel_files=1
-    segments=4
-    ```
+1. Update config values
 
 1. Make the script executable:
 
@@ -50,14 +38,12 @@ A Bash script to download / sync files from a remote FTP server to a local direc
     sudo apt install screen
     ```
 
-1. Add these jobs to your cron:
+1. Add cron jobs:
 
     ```
     ### start download ###
-    0 1 * * * /usr/bin/screen -dmS lftp /path/to/script > /dev/null 2>&1
+    0 1 * * * /usr/bin/screen -dmS <session_name> <script_path> > /dev/null 2>&1
 
     ### stop download ###
-    30 5 * * * pkill lftp  > /dev/null 2>&1
+    30 5 * * * pkill <session_name>  > /dev/null 2>&1
     ```
-
-:exclamation: Remember to update `/path/to/script`

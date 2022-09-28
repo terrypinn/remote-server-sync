@@ -1,28 +1,35 @@
 #!/bin/bash
-login=
-pass=
-host=
-remote_dir=
-local_dir=
-log_dir=
-log_file_name=remote-server-sync.log
-parallel_files=1
-segments=4
 
-trap "rm -f /tmp/remote-server-sync.lock" SIGINT SIGTERM
-if [ -e /tmp/remote-server-sync.lock ]
+# remote machine 
+remote_host=
+remote_username=
+remote_password=
+remote_dir_path=
+
+# local machine
+target_dir_path=
+lock_file_path=/tmp/sync.lock
+log_file_path=~/sync.log
+
+# lftp
+connections=4
+parallel_files=2
+
+trap "rm -f $lock_file_path" SIGINT SIGTERM
+if [ -e $lock_file_path ]
 then
-        echo "Remote server sync is running already."
+        echo "Sync is running already"
+        exit 1
+elif [ ! -e $target_dir_path ]
+then
+        echo "$target_dir_path: No such file or directory"
         exit 1
 else
-        touch /tmp/remote-server-sync.lock
-        lftp -u $login,$pass $host << EOF
-        set ssl:verify-certificate false
-        set mirror:use-pget-n $segments
-        #set net:limit-rate 1000:512000
-        mirror -c -P$parallel_files --log=$log_dir$log_file_name $remote_dir $local_dir
+        touch $lock_file_path
+        lftp sftp://$remote_username:$remote_password@$remote_host << EOF
+        mirror --continue --parallel=$parallel_files --use-pget-n=$connections --log=$log_file_path $remote_dir_path $target_dir_path
         quit
 EOF
-        rm -f /tmp/remote-server-sync.lock
+        rm -f $lock_file_path
         exit 0
 fi
